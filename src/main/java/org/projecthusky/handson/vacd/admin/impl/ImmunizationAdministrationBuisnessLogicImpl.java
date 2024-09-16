@@ -8,7 +8,9 @@
  * whereas medshare GmbH is the initial and main contributor/author of the eHealth Connector.
  *
  */
-package org.projecthusky.handson.vacd.admin;
+package org.projecthusky.handson.vacd.admin.impl;
+
+import org.projecthusky.handson.vacd.admin.ImmunizationAdministrationBuisnessLogic;
 
 /**
  * 
