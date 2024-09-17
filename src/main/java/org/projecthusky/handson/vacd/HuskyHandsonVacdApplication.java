@@ -2,6 +2,7 @@ package org.projecthusky.handson.vacd;
 
 
 import org.projecthusky.handson.vacd.admin.ImmunizationAdministrationBuisnessLogic;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -13,6 +14,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class HuskyHandsonVacdApplication implements ApplicationRunner {
 
+	@Autowired
 	private ImmunizationAdministrationBuisnessLogic immunizationAdministrationBuisnessLogic;
 
 
@@ -23,13 +25,13 @@ public class HuskyHandsonVacdApplication implements ApplicationRunner {
 	
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		log.info("Hello Husky Hands-on Emed!");
+		log.info("Hello Husky Hands-on VACD!");
 
-		if (args.containsOption("createdis")) {
-			log.info("create EMED DISPENSE DOCUMENT");
+		if (args.containsOption("createia")) {
+			log.info("create VACD IMMUNIZATION ADMINISTRATION DOCUMENT");
 			immunizationAdministrationBuisnessLogic.createImmunizationAdministrationDocument();
-		} else if (args.containsOption("readdis")) {
-			log.info("read and validate EMED DISPENSE DOCUMENT");
+		} else if (args.containsOption("readia")) {
+			log.info("read and validate VACD IMMUNIZATION ADMINISTRATION DOCUMENT");
 
 		}
 

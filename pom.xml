@@ -3,17 +3,19 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.projecthusky.handson.vacd</groupId>
+	<artifactId>husky-handson-vacd</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>husky-handson-vacd</name>
+	<description>HandsOn project for Husky EMED</description>
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.2.9</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>org.projecthusky.handson.vacd</groupId>
-	<artifactId>husky-handson-vacd</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>husky-handson-vacd</name>
-	<description>HandsOn project for Husky EMED</description>
+
 	<url />
 	<licenses>
 		<license />
@@ -38,7 +40,7 @@
 		<dependency>
 			<groupId>org.projecthusky.fhir.vacd.ch</groupId>
 			<artifactId>husky-fhir-vacd-ch-common</artifactId>
-			<version>2.5.3-SNAPSHOT</version>
+			<version>2.6.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>

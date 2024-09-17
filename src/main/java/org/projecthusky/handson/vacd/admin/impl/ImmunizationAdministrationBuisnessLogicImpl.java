@@ -10,17 +10,24 @@
  */
 package org.projecthusky.handson.vacd.admin.impl;
 
+import org.projecthusky.fhir.vacd.ch.common.resource.r4.ChVacdImmunizationAdministrationDocument;
 import org.projecthusky.handson.vacd.admin.ImmunizationAdministrationBuisnessLogic;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import ca.uhn.fhir.context.FhirContext;
 
 /**
  * 
  */
+@Service	
 public class ImmunizationAdministrationBuisnessLogicImpl
 		implements ImmunizationAdministrationBuisnessLogic {
 
 	@Override
 	public void createImmunizationAdministrationDocument() {
-		// TODO Auto-generated method stub
+
+		
 
 	}
 
