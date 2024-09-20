@@ -10,7 +10,6 @@
  */
 package org.projecthusky.handson.vacd.admin.impl;
 
-import java.util.Date;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Address;
@@ -18,7 +17,6 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.projecthusky.fhir.core.ch.resource.r4.ChCorePatientEpr;
@@ -56,7 +54,51 @@ public class ImmunizationAdministrationBuisnessLogicImpl
 
 		chVaccinationAdminDocument.setPatient(patient);
 
+		var immunization = chVaccinationAdminDocument.addImmunization();
+		immunization
+				.setVaccineCode(
+						new CodeableConcept(new Coding("http://snomed.info/sct", "871878002",
+								"Diphtheria and pertussis and poliomyelitis and tetanus vaccine")))
+				.setLotNumber("A24151");
+		var immunProtAppl = immunization.getProtocolAppliedFirstRep();
+		immunProtAppl.setDoseNumber(new PositiveIntType(1)).setSeriesDoses(new PositiveIntType(5));
+		immunProtAppl
+				.addTargetDisease(new CodeableConcept(
+						new Coding("http://snomed.info/sct", "76902006", "Tetanus (disorder)")))//
+				.addTargetDisease(new CodeableConcept(
+						new Coding("http://snomed.info/sct", "27836007", "Pertussis (disorder)")))//
+				.addTargetDisease(new CodeableConcept(
+						new Coding("http://snomed.info/sct", "397430003", "Diphtheria")))//
+				.addTargetDisease(new CodeableConcept(
+						new Coding("http://snomed.info/sct", "398102009", "Acute poliomyelitis")));
 
+		Calendar basicImmunCal = Calendar.getInstance();
+		basicImmunCal.set(1978, 5, 5);
+		chVaccinationAdminDocument.addBasicImmunization()//
+				.setCode(new CodeableConcept(new Coding(
+						"http://fhir.ch/ig/ch-vacd/CodeSystem/ch-vacd-basic-immunization-cs",
+						"bi-dtpa", "Received basic immunization against DTPa in childhood.")))//
+				.setOnset(new DateTimeType(basicImmunCal.getTime()));
+
+		var allerg = chVaccinationAdminDocument.addAllergyIntolerance();
+		allerg.setCode(new CodeableConcept(new Coding("http://snomed.info/sct", "1303850003",
+				"Adverse reaction to component of vaccine product containing Tick-borne encephalitis virus antigen")));
+		Calendar allOcc = Calendar.getInstance();
+		allOcc.set(2000, 7, 28);
+		allerg.setLastOccurrence(allOcc.getTime());
+
+		chVaccinationAdminDocument.addLaboratoryAndSerology()//
+				.setCode(new CodeableConcept(new Coding("http://loinc.org", "22502-9",
+						"Measles virus IgG Ab [Titer] in Serum")))//
+				.setValue(new Quantity().setCode("[iU]/L").setUnit("[iU]/L")
+						.setSystem("http://unitsofmeasure.org").setValue(99));
+
+		chVaccinationAdminDocument.addMedicalProblem()//
+				.setCode(new CodeableConcept(
+						new Coding("http://snomed.info/sct", "77386006", "Pregnancy")));
+		chVaccinationAdminDocument.addPastIllness()//
+				.setCode(new CodeableConcept(
+						new Coding("http://snomed.info/sct", "14189004", "Measles (disorder)")));
 
 		FhirContext ctx = FhirContext.forR4();
 		LoggerFactory.getLogger(getClass()).info(ctx.newJsonParser().setPrettyPrint(true)
