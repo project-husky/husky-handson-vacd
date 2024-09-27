@@ -20,10 +20,12 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.projecthusky.fhir.core.ch.resource.r4.ChCoreOrganizationEpr;
 import org.projecthusky.fhir.core.ch.resource.r4.ChCorePatientEpr;
 import org.projecthusky.fhir.core.ch.resource.r4.ChCorePractitionerEpr;
@@ -65,8 +67,9 @@ public class ImmunizationAdministrationBuisnessLogicImpl
 
 			chVaccinationAdminDocument.setPatient(patient);
 		}
+		ChCorePractitionerRoleEpr practitionerRole = new ChCorePractitionerRoleEpr();
 		{
-			ChCorePractitionerRoleEpr practitionerRole = new ChCorePractitionerRoleEpr();
+
 			practitionerRole.setId(UUID.randomUUID().toString());
 			ChCorePractitionerEpr practitionerEpr = practitionerRole.addPractitioner();
 			practitionerEpr.addIdentifier().setSystem("urn:oid:2.51.1.3").setValue("7621020561918");
@@ -104,40 +107,54 @@ public class ImmunizationAdministrationBuisnessLogicImpl
 					.addTargetDisease(new CodeableConcept(new Coding("http://snomed.info/sct",
 							"398102009", "Acute poliomyelitis")));
 		}
-		//
-		// Calendar basicImmunCal = Calendar.getInstance();
-		// basicImmunCal.set(1978, 5, 5);
-		// chVaccinationAdminDocument.addBasicImmunization()//
-		// .setCode(new CodeableConcept(new Coding(
-		// "http://fhir.ch/ig/ch-vacd/CodeSystem/ch-vacd-basic-immunization-cs",
-		// "bi-dtpa", "Received basic immunization against DTPa in
-		// childhood.")))//
-		// .setOnset(new DateTimeType(basicImmunCal.getTime()));
-		//
-		// var allerg = chVaccinationAdminDocument.addAllergyIntolerance();
-		// allerg.setCode(new CodeableConcept(new
-		// Coding("http://snomed.info/sct", "1303850003",
-		// "Adverse reaction to component of vaccine product containing
-		// Tick-borne encephalitis virus antigen")));
-		// Calendar allOcc = Calendar.getInstance();
-		// allOcc.set(2000, 7, 28);
-		// allerg.setLastOccurrence(allOcc.getTime());
-		//
-		// chVaccinationAdminDocument.addLaboratoryAndSerology()//
-		// .setCode(new CodeableConcept(new Coding("http://loinc.org",
-		// "22502-9",
-		// "Measles virus IgG Ab [Titer] in Serum")))//
-		// .setValue(new Quantity().setCode("[iU]/L").setUnit("[iU]/L")
-		// .setSystem("http://unitsofmeasure.org").setValue(99));
-		//
-		// chVaccinationAdminDocument.addMedicalProblem()//
-		// .setCode(new CodeableConcept(
-		// new Coding("http://snomed.info/sct", "77386006", "Pregnancy")));
-		// chVaccinationAdminDocument.addPastIllness()//
-		// .setCode(new CodeableConcept(
-		// new Coding("http://snomed.info/sct", "14189004", "Measles
-		// (disorder)")));
+		{
+			Calendar basicImmunCal = Calendar.getInstance();
+			basicImmunCal.set(1978, 5, 5);
+			chVaccinationAdminDocument.addBasicImmunization()//
+					.setCode(new CodeableConcept(new Coding(
+							"http://fhir.ch/ig/ch-vacd/CodeSystem/ch-vacd-basic-immunization-cs",
+							"bi-dtpa", "Received basic immunization against DTPa in childhood.")))//
+					.setOnset(new DateTimeType(basicImmunCal.getTime()))//
+					.setRecordedDate(new Date());
+		}
+		{
+			var allerg = chVaccinationAdminDocument.addAllergyIntolerance();
+			// allerg.setCode(new CodeableConcept(new
+			// Coding("http://snomed.info/sct", "1303850003",
+			// "Adverse reaction to component of vaccine product containing
+			// Tick-borne encephalitis virus antigen")));
+			allerg.setCode(new CodeableConcept(new Coding("http://snomed.info/sct", "716186003",
+					"No known allergy (situation)")));
 
+			Calendar allOcc = Calendar.getInstance();
+			allOcc.set(2000, 7, 28);
+			allerg.setLastOccurrence(allOcc.getTime());
+			allerg.setClinicalStatus(new CodeableConcept(
+					new Coding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+							"active", "Active")));
+		}
+		{
+			chVaccinationAdminDocument.addLaboratoryAndSerology()//
+					.setCode(new CodeableConcept(new Coding("http://loinc.org", "22502-9",
+							"Measles virus IgG Ab [Titer] in Serum")))//
+					.setValue(new Quantity().setCode("[iU]/L").setUnit("[iU]/L")
+							.setSystem("http://unitsofmeasure.org").setValue(99))//
+					.setStatus(ObservationStatus.FINAL)//
+					.setEffective(new DateTimeType(new Date()))//
+					.addPerformer(new Reference("urn:uuid:" + practitionerRole.getId()));
+		}
+		{
+			chVaccinationAdminDocument.addMedicalProblem()//
+					.setCode(new CodeableConcept(
+							new Coding("http://snomed.info/sct", "77386006", "Pregnancy")))//
+					.setRecordedDate(new Date());
+		}
+		{
+			chVaccinationAdminDocument.addPastIllness()//
+					.setCode(new CodeableConcept(
+							new Coding("http://snomed.info/sct", "14189004", "Measles (disorder)")))//
+					.setRecordedDate(new Date());
+		}
 		String jsonString = FhirContext.forR4().newJsonParser().setPrettyPrint(true)
 				.encodeResourceToString(chVaccinationAdminDocument);
 		LoggerFactory.getLogger(getClass()).info(jsonString);
