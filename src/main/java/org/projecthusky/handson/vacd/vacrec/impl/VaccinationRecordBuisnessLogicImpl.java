@@ -8,7 +8,7 @@
  * whereas medshare GmbH is the initial and main contributor/author of the eHealth Connector.
  *
  */
-package org.projecthusky.handson.vacd.admin.impl;
+package org.projecthusky.handson.vacd.vacrec.impl;
 
 import java.io.FileOutputStream;
 import java.util.Date;
@@ -18,19 +18,19 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.PositiveIntType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.projecthusky.fhir.core.ch.resource.r4.ChCoreOrganizationEpr;
 import org.projecthusky.fhir.core.ch.resource.r4.ChCorePatientEpr;
 import org.projecthusky.fhir.core.ch.resource.r4.ChCorePractitionerEpr;
 import org.projecthusky.fhir.core.ch.resource.r4.ChCorePractitionerRoleEpr;
-import org.projecthusky.fhir.vacd.ch.common.resource.r4.ChVacdImmunizationAdministrationDocument;
+import org.projecthusky.fhir.vacd.ch.common.resource.r4.ChVacdVaccinationRecordDocument;
 import org.projecthusky.fhir.vacd.ch.common.utils.ChVacdImmunizationUtils;
-import org.projecthusky.handson.vacd.admin.ImmunizationAdministrationBuisnessLogic;
+import org.projecthusky.handson.vacd.vacrec.VaccinationRecordBuisnessLogic;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
@@ -42,12 +42,11 @@ import ca.uhn.fhir.context.FhirContext;
  * 
  */
 @Service
-public class ImmunizationAdministrationBuisnessLogicImpl
-		implements ImmunizationAdministrationBuisnessLogic {
+public class VaccinationRecordBuisnessLogicImpl implements VaccinationRecordBuisnessLogic {
 
 	@Override
-	public void createImmunizationAdministrationDocument() {
-		ChVacdImmunizationAdministrationDocument chImmunAdminDocument = new ChVacdImmunizationAdministrationDocument();
+	public void createVaccinationRecordDocument() {
+		ChVacdVaccinationRecordDocument chVaccinationRecordDocument = new ChVacdVaccinationRecordDocument();
 
 		{
 			ChCorePatientEpr patient = new ChCorePatientEpr();
@@ -63,7 +62,7 @@ public class ImmunizationAdministrationBuisnessLogicImpl
 			patient.setId(UUID.randomUUID().toString());
 			patient.setGender(AdministrativeGender.MALE);
 
-			chImmunAdminDocument.setPatient(patient);
+			chVaccinationRecordDocument.setPatient(patient);
 		}
 		ChCorePractitionerRoleEpr practitionerRole = new ChCorePractitionerRoleEpr();
 		{
@@ -77,10 +76,10 @@ public class ImmunizationAdministrationBuisnessLogicImpl
 			organizationEpr.addIdentifier().setSystem("urn:oid:2.51.1.3").setValue("7631022371118");
 			organizationEpr.setName("Praxis Dr. Knochenschlosser");
 
-			chImmunAdminDocument.addAuthor(practitionerRole, new Date());
+			chVaccinationRecordDocument.addAuthor(practitionerRole, new Date());
 		}
 		{
-			var immunization = chImmunAdminDocument.addImmunization();
+			var immunization = chVaccinationRecordDocument.addImmunization();
 			// immunization.setVaccineCode(new CodeableConcept(new
 			// Coding("http://snomed.info/sct",
 			// "871878002", "Diphtheria and pertussis and poliomyelitis and
@@ -95,28 +94,30 @@ public class ImmunizationAdministrationBuisnessLogicImpl
 			var immunProtAppl = immunization.getProtocolAppliedFirstRep();
 			immunProtAppl.setDoseNumber(new PositiveIntType(1))
 					.setSeriesDoses(new PositiveIntType(5));
-
 			immunProtAppl.setTargetDisease(ChVacdImmunizationUtils
 					.getTargetDiseaseFromVaccineCode(immunization.getVaccineCode()));
+		}
+		{
+			var immunization = chVaccinationRecordDocument.addImmunization();
+			immunization.setVaccineCode(new CodeableConcept(new Coding("http://snomed.info/sct",
+					"871878002", "Diphtheria and pertussis and poliomyelitis and tetanus vaccine")))
+					.setLotNumber("A24151");
 
-			// immunProtAppl
-			// .addTargetDisease(new CodeableConcept(
-			// new Coding("http://snomed.info/sct", "76902006", "Tetanus
-			// (disorder)")))//
-			// .addTargetDisease(new CodeableConcept(new
-			// Coding("http://snomed.info/sct",
-			// "27836007", "Pertussis (disorder)")))//
-			// .addTargetDisease(new CodeableConcept(
-			// new Coding("http://snomed.info/sct", "397430003",
-			// "Diphtheria")))//
-			// .addTargetDisease(new CodeableConcept(new
-			// Coding("http://snomed.info/sct",
-			// "398102009", "Acute poliomyelitis")));
+//			immunization.setVaccineCode(new CodeableConcept(
+//					new Coding("http://fhir.ch/ig/ch-vacd/CodeSystem/ch-vacd-swissmedic-cs", "681",
+//							"Boostrix Polio")))
+//					.setLotNumber("A24151");
+			immunization.setOccurrence(new DateTimeType(new Date()));
+			var immunProtAppl = immunization.getProtocolAppliedFirstRep();
+			immunProtAppl.setDoseNumber(new PositiveIntType(1))
+					.setSeriesDoses(new PositiveIntType(5));
+			immunProtAppl.setTargetDisease(ChVacdImmunizationUtils
+					.getTargetDiseaseFromVaccineCode(immunization.getVaccineCode()));
 		}
 		{
 			Calendar basicImmunCal = Calendar.getInstance();
 			basicImmunCal.set(1978, 5, 5);
-			chImmunAdminDocument.addBasicImmunization()//
+			chVaccinationRecordDocument.addBasicImmunization()//
 					.setCode(new CodeableConcept(new Coding(
 							"http://fhir.ch/ig/ch-vacd/CodeSystem/ch-vacd-basic-immunization-cs",
 							"bi-dtpa", "Received basic immunization against DTPa in childhood.")))//
@@ -124,7 +125,7 @@ public class ImmunizationAdministrationBuisnessLogicImpl
 					.setRecordedDate(new Date());
 		}
 		{
-			var allerg = chImmunAdminDocument.addAllergyIntolerance();
+			var allerg = chVaccinationRecordDocument.addAllergyIntolerance();
 			// allerg.setCode(new CodeableConcept(new
 			// Coding("http://snomed.info/sct", "1303850003",
 			// "Adverse reaction to component of vaccine product containing
@@ -140,7 +141,7 @@ public class ImmunizationAdministrationBuisnessLogicImpl
 							"active", "Active")));
 		}
 		{
-			chImmunAdminDocument.addLaboratoryAndSerology()//
+			chVaccinationRecordDocument.addLaboratoryAndSerology()//
 					.setCode(new CodeableConcept(new Coding("http://loinc.org", "22502-9",
 							"Measles virus IgG Ab [Titer] in Serum")))//
 					.setValue(new Quantity().setCode("[iU]/L").setUnit("[iU]/L")
@@ -150,29 +151,27 @@ public class ImmunizationAdministrationBuisnessLogicImpl
 					.addPerformer(new Reference("urn:uuid:" + practitionerRole.getId()));
 		}
 		{
-			chImmunAdminDocument.addMedicalProblem()//
+			chVaccinationRecordDocument.addMedicalProblem()//
 					.setCode(new CodeableConcept(
 							new Coding("http://snomed.info/sct", "77386006", "Pregnancy")))//
 					.setRecordedDate(new Date());
 		}
 		{
-			chImmunAdminDocument.addPastIllness()//
+			chVaccinationRecordDocument.addPastIllness()//
 					.setCode(new CodeableConcept(
 							new Coding("http://snomed.info/sct", "14189004", "Measles (disorder)")))//
 					.setRecordedDate(new Date());
 		}
 		String jsonString = FhirContext.forR4().newJsonParser().setPrettyPrint(true)
-				.encodeResourceToString(chImmunAdminDocument);
+				.encodeResourceToString(chVaccinationRecordDocument);
 		LoggerFactory.getLogger(getClass()).info(jsonString);
 		try {
-			FileOutputStream fos = new FileOutputStream(
-					"./target/ImmunizationAdministrationDocument.json");
+			FileOutputStream fos = new FileOutputStream("./target/VaccinationRecordDocument.json");
 			fos.write(jsonString.getBytes());
 			fos.close();
 		} catch (Exception e) {
 			LoggerFactory.getLogger(getClass()).error("Error writing JSON to file", e);
 		}
-
 	}
 
 }
